@@ -28,25 +28,9 @@ const HTML = `<!DOCTYPE html>
     .header-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 5px; }
     .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; margin-right: 6px; animation: pulse-dot 2s ease infinite; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
-    .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 24px; }
-    .setup-card h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
-    .setup-card p { font-size: 13px; color: var(--dim); margin-bottom: 16px; line-height: 1.6; }
-    .input-group { display: flex; flex-direction: column; gap: 10px; }
-    .input-row { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 4px 4px 4px 14px; transition: border-color 0.2s; }
-    .input-row:focus-within { border-color: var(--accent); }
-    .input-row label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.08em; }
-    .input-row input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 8px 0; }
-    .input-row input::placeholder { color: var(--muted); }
-    .btn { background: var(--accent); color: #fff; border: none; border-radius: 9px; padding: 11px 20px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; transition: opacity 0.2s, transform 0.15s; width: 100%; }
-    .btn:hover { opacity: 0.85; transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
     .btn-sm { background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); color: #818cf8; border-radius: 8px; padding: 7px 14px; font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
     .btn-sm:hover { background: rgba(99,102,241,0.2); }
     .btn-sm:disabled { opacity: 0.4; cursor: not-allowed; }
-    .hint { margin-top: 14px; background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--dim); line-height: 1.9; }
-    .hint a { color: #818cf8; text-decoration: none; }
-    .hint code { color: #22d3ee; background: rgba(34,211,238,0.08); padding: 1px 5px; border-radius: 3px; font-size: 11px; }
-    .hint ol { padding-left: 18px; margin-top: 4px; }
     .filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 22px; }
     .filter-btn { background: transparent; border: 1px solid var(--border); color: var(--dim); border-radius: 20px; padding: 5px 13px; font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .filter-btn.active { color: var(--text); border-color: var(--accent); background: rgba(99,102,241,0.1); }
@@ -72,7 +56,7 @@ const HTML = `<!DOCTYPE html>
     @keyframes shimmer { 0%,100%{opacity:0.4} 50%{opacity:0.7} }
     @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
     .spinning { animation: spin 0.8s linear infinite; display: inline-block; }
-    @media(max-width:480px){ .header-title{font-size:22px} .input-row label{display:none} }
+    @media(max-width:480px){ .header-title{font-size:22px} }
   </style>
 </head>
 <body>
@@ -81,35 +65,11 @@ const HTML = `<!DOCTYPE html>
   <div class="header">
     <div>
       <div class="header-title">Carl's Dashboard</div>
-      <div class="header-sub" id="last-updated"><span class="dot"></span>Connecting...</div>
+      <div class="header-sub" id="last-updated"><span class="dot"></span>Loading...</div>
     </div>
     <button class="btn-sm" id="refresh-btn" onclick="loadEvents()" disabled>
       <span id="refresh-icon">↻</span> Refresh
     </button>
-  </div>
-
-  <div class="setup-card" id="setup-card">
-    <h2>🔑 Connect Google Calendar</h2>
-    <p>Paste your Google OAuth Access Token. 100% free — uses Google Calendar API directly.</p>
-    <div class="input-group">
-      <div class="input-row">
-        <label>Token</label>
-        <input type="password" id="gcal-token-input" placeholder="ya29.a0..." autocomplete="off" />
-      </div>
-      <button class="btn" onclick="saveAndLoad()">Connect & Load Events</button>
-    </div>
-    <div class="hint">
-      <strong style="color:var(--text)">How to get your free token:</strong>
-      <ol>
-        <li>Open <a href="https://developers.google.com/oauthplayground" target="_blank">OAuth 2.0 Playground</a></li>
-        <li>Scroll to <code>Calendar API v3</code> → tick <code>../auth/calendar.readonly</code></li>
-        <li>Click <strong>Authorize APIs</strong> → sign in with Google</li>
-        <li>Click <strong>Exchange authorization code for tokens</strong></li>
-        <li>Copy the <code>Access token</code> (starts with ya29...)</li>
-        <li>Paste above ↑ and click Connect</li>
-      </ol>
-      <div style="margin-top:8px;color:var(--muted)">⚠️ Token expires in ~1 hour. Just paste a new one when it does.</div>
-    </div>
   </div>
 
   <div class="error-box" id="error-box" style="display:none"></div>
@@ -129,48 +89,32 @@ const HTML = `<!DOCTYPE html>
   };
   let allEvents=[], activeFilter="all";
 
-  const cat = t => { const l=t.toLowerCase(); for(const[k,c]of Object.entries(CATS)) if(c.kw.some(w=>l.includes(w))) return k; return "other"; };
+  const cat = t => { const l=(t||"").toLowerCase(); for(const[k,c]of Object.entries(CATS)) if(c.kw.some(w=>l.includes(w))) return k; return "other"; };
   const days = s => { const n=new Date();n.setHours(0,0,0,0);const d=new Date(s);d.setHours(0,0,0,0);return Math.round((d-n)/86400000); };
   const fmtD = s => new Date(s).toLocaleDateString("en-PH",{weekday:"short",month:"short",day:"numeric"});
   const fmtT = s => new Date(s).toLocaleTimeString("en-PH",{hour:"2-digit",minute:"2-digit"});
   const grpLabel = s => { const d=days(s); if(d===0)return"Today"; if(d===1)return"Tomorrow"; if(d<=7)return"This Week"; if(d<=14)return"Next Week"; return new Date(s).toLocaleDateString("en-PH",{month:"long",year:"numeric"}); };
 
-  function saveAndLoad() {
-    const t = document.getElementById("gcal-token-input").value.trim();
-    if (!t) { showErr("Please paste your Google OAuth token."); return; }
-    sessionStorage.setItem("gcal_token", t);
-    document.getElementById("setup-card").style.display = "none";
-    loadEvents();
-  }
-
   async function loadEvents() {
-    const token = sessionStorage.getItem("gcal_token");
-    if (!token) { document.getElementById("setup-card").style.display="block"; return; }
     setLoading(true); clearErr();
     const now=new Date(), end=new Date(); end.setDate(end.getDate()+45);
     try {
       const r = await fetch("/api/events", {
         method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ gcalToken:token, timeMin:now.toISOString(), timeMax:end.toISOString() })
+        body: JSON.stringify({ timeMin:now.toISOString(), timeMax:end.toISOString() })
       });
       const data = await r.json();
-      if (data.error) {
-        if (data.error.includes("401") || data.error.toLowerCase().includes("invalid") || data.error.toLowerCase().includes("expired")) {
-          sessionStorage.removeItem("gcal_token");
-          document.getElementById("setup-card").style.display="block";
-          showErr("Token expired. Get a new one from <a href='https://developers.google.com/oauthplayground' target='_blank' style='color:#818cf8'>OAuth Playground</a> and paste it again.");
-        } else { throw new Error(data.error); }
-        return;
-      }
+      if (data.error) throw new Error(data.error);
       allEvents = data.events || [];
       renderFilters(); renderEvents(); setUpdated();
-    } catch(e) { showErr("Failed: "+e.message); }
-    finally { setLoading(false); }
+    } catch(e) {
+      showErr("Failed to load events: " + e.message + "<br>Check that GCAL_TOKEN is set correctly in Railway Variables.");
+    } finally { setLoading(false); }
   }
 
   function renderFilters() {
     const el=document.getElementById("filters"); el.style.display="flex";
-    const cnt={}; allEvents.forEach(ev=>{ const c=cat(ev.summary||""); cnt[c]=(cnt[c]||0)+1; });
+    const cnt={}; allEvents.forEach(ev=>{ const c=cat(ev.summary); cnt[c]=(cnt[c]||0)+1; });
     let h=\`<button class="filter-btn \${activeFilter==="all"?"active":""}" onclick="setFilter('all')">All · \${allEvents.length}</button>\`;
     for(const[k,c]of Object.entries(CATS)) {
       if(!cnt[k]) continue;
@@ -184,8 +128,8 @@ const HTML = `<!DOCTYPE html>
 
   function renderEvents() {
     const el=document.getElementById("events-container");
-    const list=activeFilter==="all"?allEvents:allEvents.filter(ev=>cat(ev.summary||"")===activeFilter);
-    if(!list.length){ el.innerHTML='<div class="empty">No events found</div>'; return; }
+    const list=activeFilter==="all"?allEvents:allEvents.filter(ev=>cat(ev.summary)===activeFilter);
+    if(!list.length){ el.innerHTML='<div class="empty">No upcoming events</div>'; return; }
     const grps={};
     list.forEach(ev=>{ const s=ev.start?.dateTime||ev.start?.date; const l=grpLabel(s); if(!grps[l])grps[l]=[]; grps[l].push(ev); });
     const ORDER=["Today","Tomorrow","This Week","Next Week"];
@@ -194,14 +138,14 @@ const HTML = `<!DOCTYPE html>
     keys.forEach((g,i)=>{
       const lc=g==="Today"?"today":g==="Tomorrow"?"tomorrow":"default";
       h+=\`<div class="group" style="animation-delay:\${i*0.05}s"><div class="group-header"><span class="group-label \${lc}">\${g}</span><div class="group-line"></div><span class="group-count">\${grps[g].length}</span></div>\`;
-      grps[g].forEach(ev=>{ h+=card(ev); });
+      grps[g].forEach(ev=>{ h+=cardHTML(ev); });
       h+=\`</div>\`;
     });
     el.innerHTML=h;
   }
 
-  function card(ev) {
-    const c=CATS[cat(ev.summary||"")], s=ev.start?.dateTime||ev.start?.date, isDT=!!ev.start?.dateTime, d=days(s);
+  function cardHTML(ev) {
+    const c=CATS[cat(ev.summary)], s=ev.start?.dateTime||ev.start?.date, isDT=!!ev.start?.dateTime, d=days(s);
     const badge=d===0?\`<span class="badge" style="background:#ef4444;color:#fff">TODAY</span>\`:d===1?\`<span class="badge" style="background:#f97316;color:#fff">TOMORROW</span>\`:"";
     return \`<div class="event-card" style="background:\${c.bg};border-left-color:\${c.color}">
       <span class="event-icon">\${c.icon}</span>
@@ -225,22 +169,23 @@ const HTML = `<!DOCTYPE html>
   function showErr(m){ const e=document.getElementById("error-box"); e.innerHTML="⚠️ "+m; e.style.display="block"; }
   function clearErr(){ document.getElementById("error-box").style.display="none"; }
 
-  window.addEventListener("DOMContentLoaded",()=>{
-    if(sessionStorage.getItem("gcal_token")){ document.getElementById("setup-card").style.display="none"; loadEvents(); }
+  window.addEventListener("DOMContentLoaded", ()=>{
+    loadEvents();
     setInterval(loadEvents, 5*60*1000);
   });
 </script>
 </body>
 </html>`;
 
-// ─── ROUTES ──────────────────────────────────────────────────────────────────
+// ─── SERVE HTML ───────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.send(HTML));
 
-// Calls Google Calendar API directly — FREE, no Anthropic key needed
+// ─── GOOGLE CALENDAR API — TOKEN FROM RAILWAY VARIABLE ───────────────────────
 app.post("/api/events", async (req, res) => {
-  const { gcalToken, timeMin, timeMax } = req.body;
-  if (!gcalToken) return res.status(400).json({ error: "Missing token" });
+  const gcalToken = process.env.GCAL_TOKEN;
+  if (!gcalToken) return res.status(500).json({ error: "GCAL_TOKEN not set in Railway Variables" });
 
+  const { timeMin, timeMax } = req.body;
   try {
     const url = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
     url.searchParams.set("timeMin", timeMin);
@@ -255,9 +200,8 @@ app.post("/api/events", async (req, res) => {
 
     const data = await r.json();
     if (!r.ok) return res.status(r.status).json({ error: data?.error?.message || String(r.status) });
-
     res.json({ events: data.items || [] });
-  } catch (e) {
+  } catch(e) {
     res.status(500).json({ error: e.message });
   }
 });
