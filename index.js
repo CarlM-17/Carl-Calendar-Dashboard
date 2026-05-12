@@ -2,6 +2,39 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
+// ─── AUTO-REFRESH ACCESS TOKEN ────────────────────────────────────────────────
+let cachedToken = null;
+let tokenExpiry = 0;
+
+async function getAccessToken() {
+  // Return cached token if still valid (with 60s buffer)
+  if (cachedToken && Date.now() < tokenExpiry - 60000) return cachedToken;
+
+  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN } = process.env;
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REFRESH_TOKEN) {
+    throw new Error("Missing GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET or GOOGLE_REFRESH_TOKEN in Railway Variables");
+  }
+
+  const r = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      refresh_token: GOOGLE_REFRESH_TOKEN,
+      grant_type: "refresh_token",
+    }),
+  });
+
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error_description || "Failed to refresh token");
+
+  cachedToken = data.access_token;
+  tokenExpiry = Date.now() + (data.expires_in * 1000);
+  return cachedToken;
+}
+
+// ─── HTML ─────────────────────────────────────────────────────────────────────
 const HTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,7 +94,6 @@ const HTML = `<!DOCTYPE html>
 </head>
 <body>
 <div class="container">
-
   <div class="header">
     <div>
       <div class="header-title">Carl's Dashboard</div>
@@ -71,7 +103,6 @@ const HTML = `<!DOCTYPE html>
       <span id="refresh-icon">↻</span> Refresh
     </button>
   </div>
-
   <div class="error-box" id="error-box" style="display:none"></div>
   <div class="filters" id="filters" style="display:none"></div>
   <div id="events-container"></div>
@@ -107,9 +138,8 @@ const HTML = `<!DOCTYPE html>
       if (data.error) throw new Error(data.error);
       allEvents = data.events || [];
       renderFilters(); renderEvents(); setUpdated();
-    } catch(e) {
-      showErr("Failed to load events: " + e.message + "<br>Check that GCAL_TOKEN is set correctly in Railway Variables.");
-    } finally { setLoading(false); }
+    } catch(e) { showErr(e.message); }
+    finally { setLoading(false); }
   }
 
   function renderFilters() {
@@ -169,7 +199,7 @@ const HTML = `<!DOCTYPE html>
   function showErr(m){ const e=document.getElementById("error-box"); e.innerHTML="⚠️ "+m; e.style.display="block"; }
   function clearErr(){ document.getElementById("error-box").style.display="none"; }
 
-  window.addEventListener("DOMContentLoaded", ()=>{
+  window.addEventListener("DOMContentLoaded",()=>{
     loadEvents();
     setInterval(loadEvents, 5*60*1000);
   });
@@ -177,16 +207,14 @@ const HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
-// ─── SERVE HTML ───────────────────────────────────────────────────────────────
+// ─── ROUTES ───────────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.send(HTML));
 
-// ─── GOOGLE CALENDAR API — TOKEN FROM RAILWAY VARIABLE ───────────────────────
 app.post("/api/events", async (req, res) => {
-  const gcalToken = process.env.GCAL_TOKEN;
-  if (!gcalToken) return res.status(500).json({ error: "GCAL_TOKEN not set in Railway Variables" });
-
-  const { timeMin, timeMax } = req.body;
   try {
+    const token = await getAccessToken();
+    const { timeMin, timeMax } = req.body;
+
     const url = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
     url.searchParams.set("timeMin", timeMin);
     url.searchParams.set("timeMax", timeMax);
@@ -195,7 +223,7 @@ app.post("/api/events", async (req, res) => {
     url.searchParams.set("maxResults", "100");
 
     const r = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${gcalToken}` }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     const data = await r.json();
